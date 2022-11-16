@@ -10,8 +10,10 @@ FROM alpine:latest
 
 WORKDIR /app
 
+ARG DB_CONNECT_STRING="host=database port=5432 user=postgres password=postgres dbname=postgres sslmode=disable"
+
 COPY --from=builder /app/main .
 
 EXPOSE 80
 
-CMD ["./main"]
+CMD ["./main", "${DB_CONNECT_STRING}"]

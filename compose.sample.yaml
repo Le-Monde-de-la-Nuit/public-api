@@ -2,5 +2,17 @@ version: '3'
 services:
   api:
     build: .
+    depends_on:
+      - database
     ports:
       - "8080:80"
+    environment:
+      DB_CONNECT_STRING: host=database port=5432 user=postgres password=postgres dbname=postgres sslmode=disable
+  database:
+    image: postgres:alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    volumes:
+      - ./database:/var/lib/postgresql/data
