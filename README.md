@@ -6,14 +6,14 @@ Official Public API of [Le Monde de la Nuit](https://discord.gg/9KCJuEYUx2)
 
 - [x] /
 - [ ] /members
-- [ ] /member?id=:id
+- [ ] /member/id/:id
 - [ ] /news
-- [ ] /news?id=:id
-- [ ] /news?last=:nbr
+- [ ] /news/id/:id
+- [ ] /news/last/:nbr
 - [ ] /roles
-- [ ] /role?id=:id
+- [ ] /role/id/:id
 
 ## Technologies
 
 - Golang 1.19
-- [[Gorilla/mux]]
+- Gorilla/mux

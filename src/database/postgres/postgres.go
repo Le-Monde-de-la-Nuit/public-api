@@ -5,18 +5,18 @@ import (
 	"strings"
 )
 
-func Insert(db *sql.DB, table string, data []any) {
+func Insert(db *sql.DB, q string, values ...any) sql.Result {
 	tx, err := db.Begin()
 	if err != nil {
 		panic(err)
 	}
-	defer tx.Rollback()
-	stmt, err := tx.Prepare("INSERT INTO " + table + " VALUES " + generateIndexAsString(data))
+	stmt, err := tx.Prepare(q)
 	if err != nil {
+		tx.Rollback()
 		panic(err)
 	}
 	defer stmt.Close()
-	_, err = stmt.Exec(data...)
+	result, err := stmt.Exec(values...)
 	if err != nil {
 		panic(err)
 	}
@@ -24,6 +24,7 @@ func Insert(db *sql.DB, table string, data []any) {
 	if err != nil {
 		panic(err)
 	}
+	return result
 }
 
 func createTable(db *sql.DB, name string, columns []string) {
@@ -31,17 +32,4 @@ func createTable(db *sql.DB, name string, columns []string) {
 	if err != nil {
 		panic(err)
 	}
-}
-
-func generateIndexAsArray(data []any) []string {
-	values := make([]string, len(data))
-	for i := 0; i < len(data); i++ {
-		values[i] = "$" + string(rune(i+1))
-	}
-	return values
-}
-
-func generateIndexAsString(data []any) string {
-	values := generateIndexAsArray(data)
-	return strings.Join(values, ", ")
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
@@ -8,13 +9,28 @@ import (
 	"public-api/src/database"
 	"public-api/src/database/postgres"
 	"public-api/src/handler"
+	"strconv"
 	"time"
 )
 
 func main() {
-	database.PublicCredentials = database.ParseConnectionString(os.Args[1])
+	port, err := strconv.Atoi(os.Args[2])
+	if err != nil {
+		fmt.Println(os.Args)
+		panic(err)
+	}
+	database.PublicCredentials = &database.Credentials{
+		Host:         os.Args[1],
+		Port:         port,
+		User:         os.Args[3],
+		Password:     os.Args[4],
+		DatabaseName: os.Args[5],
+	}
+	check()
 	r := mux.NewRouter()
 	r.HandleFunc("/", handler.HomeHandler)
+	r.HandleFunc("/user", handler.UserHandler)
+	r.HandleFunc("/role", handler.RoleHandler)
 	srv := &http.Server{
 		Handler: r,
 		// Good practice: enforce timeouts for servers you create!

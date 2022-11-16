@@ -2,7 +2,7 @@ package postgres
 
 type User struct {
 	ID      int  `json:"id"`
-	RoleID  Role `json:"role_id"`
+	Role    Role `json:"role_id"`
 	Discord int  `json:"discord"`
 }
 
