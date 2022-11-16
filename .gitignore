@@ -29,5 +29,5 @@ go.work
 .idea/
 
 compose.yaml
-
 database/
+!src/database/
