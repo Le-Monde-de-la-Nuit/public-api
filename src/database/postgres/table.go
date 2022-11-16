@@ -40,6 +40,6 @@ func GenerateActionsTable(db *sql.DB) {
 		"place_id INT REFERENCES places(id)",
 		"type_id INT REFERENCES types(id)",
 		"goal text",
-		"data timestamptz",
+		"time timestamptz",
 	})
 }

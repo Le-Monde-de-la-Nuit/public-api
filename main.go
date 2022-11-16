@@ -5,16 +5,16 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"public-api/src"
 	"public-api/src/database"
 	"public-api/src/database/postgres"
+	"public-api/src/handler"
 	"time"
 )
 
 func main() {
 	database.PublicCredentials = database.ParseConnectionString(os.Args[1])
 	r := mux.NewRouter()
-	r.HandleFunc("/", src.HomeHandler)
+	r.HandleFunc("/", handler.HomeHandler)
 	srv := &http.Server{
 		Handler: r,
 		// Good practice: enforce timeouts for servers you create!
