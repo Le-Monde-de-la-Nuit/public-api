@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"public-api/src/response"
+	"strings"
 )
 
 func defaultHandler(r *http.Request) {
@@ -11,13 +12,15 @@ func defaultHandler(r *http.Request) {
 }
 
 func writeResponse(w http.ResponseWriter, resp *response.Response) error {
-	w.WriteHeader(resp.StatusCode)
+	if resp.StatusCode != http.StatusOK {
+		w.WriteHeader(resp.StatusCode)
+	}
 	return json.NewEncoder(w).Encode(resp)
 }
 
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	defaultHandler(r)
-	resp := response.Response{StatusCode: 200, Message: "Welcome to the API"}
+	resp := response.Response{StatusCode: http.StatusOK, Message: "Welcome to the API"}
 	err := writeResponse(w, &resp)
 	if err != nil {
 		panic(err)
@@ -25,20 +28,20 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func UserHandler(w http.ResponseWriter, r *http.Request) {
-	handler(w, r, nil, postUserHandler)
+	handler(w, r, getUserHandler, postUserHandler)
 }
 
 func RoleHandler(w http.ResponseWriter, r *http.Request) {
-	handler(w, r, nil, postRoleHandler)
+	handler(w, r, getRoleHandler, postRoleHandler)
 }
 
 func handler(w http.ResponseWriter, r *http.Request, g func(http.ResponseWriter, *http.Request, *response.Response),
 	p func(http.ResponseWriter, *http.Request, *response.Response)) {
 	defaultHandler(r)
-	resp := response.Response{StatusCode: 200}
+	resp := response.Response{StatusCode: http.StatusOK}
 	switch r.Method {
 	case http.MethodGet:
-		resp.Message = "Get role" // use g later
+		g(w, r, &resp)
 	case http.MethodPost:
 		p(w, r, &resp)
 	}
@@ -46,4 +49,27 @@ func handler(w http.ResponseWriter, r *http.Request, g func(http.ResponseWriter,
 	if err != nil {
 		panic(err)
 	}
+}
+
+func ParseQueryInURI(uri string) map[string]string {
+	query := strings.Split(uri, "?")
+	if len(query) < 2 {
+		return nil
+	}
+	queries := strings.Split(query[1], "&")
+	data := map[string]string{}
+
+	for _, v := range queries {
+		splited := strings.Split(v, "=")
+		data[splited[0]] = splited[1]
+	}
+	return data
+}
+
+func ParseBody(r *http.Request, i interface{}) error {
+	err := json.NewDecoder(r.Body).Decode(i)
+	if err != nil {
+		return err
+	}
+	return nil
 }

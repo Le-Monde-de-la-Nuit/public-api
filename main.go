@@ -30,13 +30,16 @@ func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/", handler.HomeHandler)
 	r.HandleFunc("/user", handler.UserHandler)
+	r.HandleFunc("/users", handler.UserHandler)
 	r.HandleFunc("/role", handler.RoleHandler)
+	r.HandleFunc("/roles", handler.RoleHandler)
 	srv := &http.Server{
 		Handler: r,
 		// Good practice: enforce timeouts for servers you create!
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
+	fmt.Println("API is running")
 	log.Fatal(srv.ListenAndServe())
 }
 

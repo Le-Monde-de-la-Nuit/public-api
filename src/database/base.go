@@ -64,11 +64,57 @@ func Connect(driverName string, c *Credentials) (*sql.DB, error) {
 	return db, nil
 }
 
-func RowsToInterface(r *sql.Rows, i []interface{}) ([]interface{}, error) {
-	defer r.Close()
-	err := r.Scan(i...)
+func RowToInterface(r *sql.Row, i interface{}) (interface{}, error) {
+	err := r.Scan(i)
 	if err != nil {
 		return nil, err
 	}
 	return i, nil
+}
+
+func RowsToInterface(r *sql.Rows) (map[string][]interface{}, error) {
+	defer r.Close()
+	columns, err := r.Columns()
+	if err != nil {
+		return nil, err
+	}
+	count := len(columns)
+	values := make([]string, count)
+	scanArgs := make([]interface{}, count)
+	for i := range values {
+		scanArgs[i] = &values[i]
+	}
+
+	masterData := make(map[string][]interface{})
+
+	for r.Next() {
+		err := r.Scan(scanArgs...)
+		if err != nil {
+			return nil, err
+		}
+		for i, v := range values {
+
+			x := v
+
+			//NOTE: FROM THE GO BLOG: JSON and GO - 25 Jan 2011:
+			// The json package uses map[string]interface{} and []interface{} values to store arbitrary JSON objects and arrays; it will happily unmarshal any valid JSON blob into a plain interface{} value. The default concrete Go types are:
+			//
+			// bool for JSON booleans,
+			// float64 for JSON numbers,
+			// string for JSON strings, and
+			// nil for JSON null.
+
+			if nx, ok := strconv.ParseFloat(string(x), 64); ok == nil {
+				masterData[columns[i]] = append(masterData[columns[i]], nx)
+			} else if b, ok := strconv.ParseBool(string(x)); ok == nil {
+				masterData[columns[i]] = append(masterData[columns[i]], b)
+			} else if "string" == fmt.Sprintf("%T", string(x)) {
+				masterData[columns[i]] = append(masterData[columns[i]], string(x))
+			} else {
+				fmt.Printf("Failed on if for type %T of %v\n", x, x)
+			}
+
+		}
+	}
+	return masterData, nil
 }

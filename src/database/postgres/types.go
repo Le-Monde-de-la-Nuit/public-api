@@ -1,9 +1,9 @@
 package postgres
 
 type User struct {
-	ID      int  `json:"id"`
-	Role    Role `json:"role_id"`
-	Discord int  `json:"discord"`
+	ID      int `json:"id"`
+	RoleID  int `json:"role_id"`
+	Discord int `json:"discord"`
 }
 
 type Role struct {
