@@ -10,7 +10,7 @@ import (
 
 func postUserHandler(w http.ResponseWriter, r *http.Request, resp *response.Response) {
 	data := postgres.User{}
-	err := ParseBody(r, data)
+	err := ParseBody(r, &data)
 	if err != nil {
 		resp.StatusCode = http.StatusBadRequest
 		resp.Message = "Bad request"

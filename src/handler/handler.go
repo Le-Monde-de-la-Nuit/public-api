@@ -15,7 +15,7 @@ func writeResponse(w http.ResponseWriter, resp *response.Response) error {
 	if resp.StatusCode != http.StatusOK {
 		w.WriteHeader(resp.StatusCode)
 	}
-	return json.NewEncoder(w).Encode(resp)
+	return json.NewEncoder(w).Encode(&resp)
 }
 
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
