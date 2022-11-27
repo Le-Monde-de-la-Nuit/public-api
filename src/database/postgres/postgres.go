@@ -5,7 +5,12 @@ import (
 	"strings"
 )
 
-func Insert(db *sql.DB, q string, values ...any) sql.Result {
+type Postgres struct {
+	Db *sql.DB
+}
+
+func (pg *Postgres) Insert(q string, values ...any) sql.Result {
+	db := pg.Db
 	tx, err := db.Begin()
 	if err != nil {
 		panic(err)
@@ -25,6 +30,15 @@ func Insert(db *sql.DB, q string, values ...any) sql.Result {
 		panic(err)
 	}
 	return result
+}
+
+func (pg *Postgres) Get(q string, values ...any) (*sql.Rows, error) {
+	db := pg.Db
+	result, err := db.Query(q, values...)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 func createTable(db *sql.DB, name string, columns []string) {
