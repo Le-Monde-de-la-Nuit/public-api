@@ -48,12 +48,12 @@ func check() {
 	if err != nil {
 		panic(err)
 	}
+	pg := postgres.Postgres{Db: db}
 	// Roles before user
-	postgres.GenerateRolesTable(db)
-	postgres.GenerateUsersTable(db)
+	pg.GenerateRolesTable().GenerateUsersTable()
 	// Places and types before actions
-	postgres.GeneratePlacesTable(db)
-	postgres.GenerateTypesTable(db)
-	postgres.GenerateActionsTable(db)
+	pg.GeneratePlacesTable().GenerateTypesTable().GenerateActionsTable()
+	// Posts and Tags before PostTags
+	pg.GeneratePostsTable().GenerateTagsTable().GeneratePostTagsTable()
 	defer db.Close()
 }

@@ -2,11 +2,18 @@ package postgres
 
 import (
 	"database/sql"
+	"database/sql/driver"
 	"strings"
+	"time"
 )
 
 type Postgres struct {
 	Db *sql.DB
+}
+
+type NullTime struct {
+	Time  time.Time
+	Valid bool // Valid is true if Time is not NULL
 }
 
 func (pg *Postgres) Insert(q string, values ...any) sql.Result {
@@ -41,9 +48,23 @@ func (pg *Postgres) Get(q string, values ...any) (*sql.Rows, error) {
 	return result, nil
 }
 
-func createTable(db *sql.DB, name string, columns []string) {
-	_, err := db.Exec("CREATE TABLE IF NOT EXISTS " + name + " (" + strings.Join(columns, ", ") + ")")
+func (pg *Postgres) createTable(name string, columns []string) {
+	_, err := pg.Db.Exec("CREATE TABLE IF NOT EXISTS " + name + " (" + strings.Join(columns, ", ") + ")")
 	if err != nil {
 		panic(err)
 	}
+}
+
+// Scan implements the Scanner interface.
+func (nt *NullTime) Scan(value interface{}) error {
+	nt.Time, nt.Valid = value.(time.Time)
+	return nil
+}
+
+// Value implements the driver Valuer interface.
+func (nt *NullTime) Value() (driver.Value, error) {
+	if !nt.Valid {
+		return nil, nil
+	}
+	return nt.Time, nil
 }
