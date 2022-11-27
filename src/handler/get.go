@@ -9,15 +9,16 @@ import (
 )
 
 type getHandle struct {
-	w    http.ResponseWriter
-	r    *http.Request
-	resp *response.Response
-	pg   postgres.Postgres
+	w      http.ResponseWriter
+	r      *http.Request
+	resp   *response.Response
+	pg     postgres.Postgres
+	dbName string
 }
 
 func getUserHandler(w http.ResponseWriter, r *http.Request, resp *response.Response) {
 	h := getHandle{w: w, r: r, resp: resp}
-	h.initializeDbForGet()
+	h.initializeDbForGet("members")
 	result, err := h.getHandler("users")
 	defer h.pg.Db.Close()
 
@@ -41,7 +42,7 @@ func getUserHandler(w http.ResponseWriter, r *http.Request, resp *response.Respo
 
 func getRoleHandler(w http.ResponseWriter, r *http.Request, resp *response.Response) {
 	h := getHandle{w: w, r: r, resp: resp}
-	h.initializeDbForGet()
+	h.initializeDbForGet("members")
 	result, err := h.getHandler("roles")
 	defer h.pg.Db.Close()
 
@@ -92,7 +93,8 @@ func (h *getHandle) getOneHandler(table string) (*sql.Rows, error) {
 }
 
 func (h *getHandle) getAllHandler(table string) (*sql.Rows, error) {
-	db, err := database.Connect("postgres", database.PublicCredentials)
+	c := database.PublicCredentials
+	db, err := c.Connect("postgres", c.GenerateConnectionString(h.dbName))
 	if err != nil {
 		panic(err)
 	}
@@ -100,12 +102,14 @@ func (h *getHandle) getAllHandler(table string) (*sql.Rows, error) {
 	return h.pg.Get("SELECT * FROM " + table)
 }
 
-func (h *getHandle) initializeDbForGet() {
-	db, err := database.Connect("postgres", database.PublicCredentials)
+func (h *getHandle) initializeDbForGet(dbName string) {
+	c := database.PublicCredentials
+	db, err := c.Connect("postgres", c.GenerateConnectionString(dbName))
 	if err != nil {
 		panic(err)
 	}
 	h.pg = postgres.Postgres{Db: db}
+	h.dbName = dbName
 }
 
 func (h *getHandle) manageErrors(result *sql.Rows, err error) bool {

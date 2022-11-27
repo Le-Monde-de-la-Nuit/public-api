@@ -11,20 +11,17 @@ var (
 )
 
 type Credentials struct {
-	Host         string
-	Port         int
-	User         string
-	Password     string
-	DatabaseName string
+	User     string
+	Password string
 }
 
-func GenerateConnectionString(c *Credentials) string {
-	return fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", c.Host, c.Port, c.User,
-		c.Password, c.DatabaseName)
+func (c *Credentials) GenerateConnectionString(db string) string {
+	return fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", "db-"+db, 5432, c.User,
+		c.Password, db)
 }
 
-func Connect(driverName string, c *Credentials) (*sql.DB, error) {
-	db, err := sql.Open(driverName, GenerateConnectionString(c))
+func (c *Credentials) Connect(driverName string, dbName string) (*sql.DB, error) {
+	db, err := sql.Open(driverName, c.GenerateConnectionString(dbName))
 	if err != nil {
 		return nil, err
 	}

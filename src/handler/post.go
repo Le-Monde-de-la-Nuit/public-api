@@ -9,13 +9,14 @@ import (
 )
 
 type postHandle struct {
-	w    http.ResponseWriter
-	r    *http.Request
-	resp *response.Response
+	w      http.ResponseWriter
+	r      *http.Request
+	resp   *response.Response
+	dbName string
 }
 
 func postUserHandler(w http.ResponseWriter, r *http.Request, resp *response.Response) {
-	h := postHandle{w: w, r: r, resp: resp}
+	h := postHandle{w: w, r: r, resp: resp, dbName: "members"}
 	data := postgres.User{}
 	err := ParseBody(r, &data)
 	if err != nil {
@@ -30,7 +31,7 @@ func postUserHandler(w http.ResponseWriter, r *http.Request, resp *response.Resp
 }
 
 func postRoleHandler(w http.ResponseWriter, r *http.Request, resp *response.Response) {
-	h := postHandle{w: w, r: r, resp: resp}
+	h := postHandle{w: w, r: r, resp: resp, dbName: "members"}
 	data := postgres.Role{}
 	err := ParseBody(r, &data)
 	if err != nil {
@@ -46,7 +47,8 @@ func postRoleHandler(w http.ResponseWriter, r *http.Request, resp *response.Resp
 func (h *postHandle) postHandler(q string, values ...any) {
 	w := h.w
 	resp := h.resp
-	db, err := database.Connect("postgres", database.PublicCredentials)
+	c := database.PublicCredentials
+	db, err := c.Connect("postgres", c.GenerateConnectionString(h.dbName))
 	if err != nil {
 		resp.StatusCode = http.StatusInternalServerError
 		resp.Message = "Internal server error"

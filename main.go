@@ -9,22 +9,13 @@ import (
 	"public-api/src/database"
 	"public-api/src/database/postgres"
 	"public-api/src/handler"
-	"strconv"
 	"time"
 )
 
 func main() {
-	port, err := strconv.Atoi(os.Args[2])
-	if err != nil {
-		fmt.Println(os.Args)
-		panic(err)
-	}
 	database.PublicCredentials = &database.Credentials{
-		Host:         os.Args[1],
-		Port:         port,
-		User:         os.Args[3],
-		Password:     os.Args[4],
-		DatabaseName: os.Args[5],
+		User:     os.Args[1],
+		Password: os.Args[2],
 	}
 	check()
 	r := mux.NewRouter()
@@ -44,16 +35,27 @@ func main() {
 }
 
 func check() {
-	db, err := database.Connect("postgres", database.PublicCredentials)
+	credentials := database.PublicCredentials
+	// Roles before user
+	db, err := credentials.Connect("postgres", "members")
 	if err != nil {
 		panic(err)
 	}
 	pg := postgres.Postgres{Db: db}
-	// Roles before user
 	pg.GenerateRolesTable().GenerateUsersTable()
 	// Places and types before actions
+	db, err = credentials.Connect("postgres", "actions")
+	if err != nil {
+		panic(err)
+	}
+	pg = postgres.Postgres{Db: db}
 	pg.GeneratePlacesTable().GenerateTypesTable().GenerateActionsTable()
 	// Posts and Tags before PostTags
+	db, err = credentials.Connect("postgres", "posts")
+	if err != nil {
+		panic(err)
+	}
+	pg = postgres.Postgres{Db: db}
 	pg.GeneratePostsTable().GenerateTagsTable().GeneratePostTagsTable()
 	defer db.Close()
 }
