@@ -29,8 +29,8 @@ func main() {
 	check()
 	r := mux.NewRouter()
 	r.HandleFunc("/", handler.HomeHandler)
-	r.HandleFunc("/user", handler.UserHandler)
-	r.HandleFunc("/users", handler.UserHandler)
+	r.HandleFunc("/member", handler.UserHandler)
+	r.HandleFunc("/members", handler.UserHandler)
 	r.HandleFunc("/role", handler.RoleHandler)
 	r.HandleFunc("/roles", handler.RoleHandler)
 	srv := &http.Server{

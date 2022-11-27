@@ -1,5 +1,7 @@
 package postgres
 
+import "time"
+
 type User struct {
 	ID      int `json:"id"`
 	RoleID  int `json:"role_id"`
@@ -24,10 +26,10 @@ type Type struct {
 }
 
 type Action struct {
-	ID    int    `json:"id"`
-	Name  string `json:"name"`
-	Place Place  `json:"place"`
-	Type  Type   `json:"type"`
-	Goal  string `json:"goal"`
-	Time  string `json:"time"`
+	ID    int       `json:"id"`
+	Name  string    `json:"name"`
+	Place Place     `json:"place"`
+	Type  Type      `json:"type"`
+	Goal  string    `json:"goal"`
+	Time  time.Time `json:"time"`
 }
