@@ -8,14 +8,14 @@ Official Public API of [Le Monde de la Nuit](https://discord.gg/9KCJuEYUx2)
 - [x] /
 - [x] /members
 - [x] /member?id=:id
-- [ ] /news
 - [x] /roles
 - [x] /role?id=:id
 ### Posts
+- [ ] /news
 - [ ] /news?id=:id
 - [ ] /news?last=:nbr
 - [ ] /tags
-- [ ] /tags?id=:id
+- [ ] /tag?id=:id
 ### Actions
 - [ ] /places
 - [ ] /place?id=:id

@@ -7,39 +7,28 @@ services:
       - db-actions
       - db-posts
     ports:
-      - "80:80"
+      - "8080:80"
     environment:
-      USER: postgres
-      PASSWORD: postgres
+      USER: root
+      PASSWORD: mariadb
   db-members:
-    image: postgres:alpine
+    image: mariadb
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: members
+      MYSQL_ROOT_PASSWORD: mariadb
+      MYSQL_DATABASE: members
     volumes:
-      - ./database/members:/var/lib/postgresql/data
+      - ./database/members:/var/lib/mysql
   db-actions:
-    image: postgres:alpine
+    image: mariadb
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: actions
+      MYSQL_ROOT_PASSWORD: mariadb
+      MYSQL_DATABASE: actions
     volumes:
-      - ./database/actions:/var/lib/postgresql/data
+      - ./database/actions:/var/lib/mysql
   db-posts:
-    image: postgres:alpine
+    image: mariadb
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: posts
+      MYSQL_ROOT_PASSWORD: mariadb
+      MYSQL_DATABASE: posts
     volumes:
-      - ./database/posts:/var/lib/postgresql/data
-  database:
-    image: postgres:alpine
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: members
-    volumes:
-      - ./database:/var/lib/postgresql/data
+      - ./database/posts:/var/lib/mysql

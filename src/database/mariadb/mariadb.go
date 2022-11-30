@@ -1,4 +1,4 @@
-package postgres
+package mariadb
 
 import (
 	"database/sql"
@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-type Postgres struct {
+type Mariadb struct {
 	Db *sql.DB
 }
 
@@ -16,7 +16,7 @@ type NullTime struct {
 	Valid bool // Valid is true if Time is not NULL
 }
 
-func (pg *Postgres) Insert(q string, values ...any) sql.Result {
+func (pg *Mariadb) Insert(q string, values ...any) sql.Result {
 	db := pg.Db
 	tx, err := db.Begin()
 	if err != nil {
@@ -39,7 +39,7 @@ func (pg *Postgres) Insert(q string, values ...any) sql.Result {
 	return result
 }
 
-func (pg *Postgres) Get(q string, values ...any) (*sql.Rows, error) {
+func (pg *Mariadb) Get(q string, values ...any) (*sql.Rows, error) {
 	db := pg.Db
 	result, err := db.Query(q, values...)
 	if err != nil {
@@ -48,7 +48,7 @@ func (pg *Postgres) Get(q string, values ...any) (*sql.Rows, error) {
 	return result, nil
 }
 
-func (pg *Postgres) createTable(name string, columns []string) {
+func (pg *Mariadb) createTable(name string, columns []string) {
 	_, err := pg.Db.Exec("CREATE TABLE IF NOT EXISTS " + name + " (" + strings.Join(columns, ", ") + ")")
 	if err != nil {
 		panic(err)

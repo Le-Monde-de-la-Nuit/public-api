@@ -44,6 +44,16 @@ func RoleHandler(w http.ResponseWriter, r *http.Request) {
 	handle.handler()
 }
 
+func PostHandler(w http.ResponseWriter, r *http.Request) {
+	handle := handle{w: w, r: r, g: getPostHandler, p: postPostHandler}
+	handle.handler()
+}
+
+func TagHandler(w http.ResponseWriter, r *http.Request) {
+	handle := handle{w: w, r: r, g: getTagHandler, p: postTagHandler}
+	handle.handler()
+}
+
 func (h *handle) handler() {
 	r := h.r
 	w := h.w

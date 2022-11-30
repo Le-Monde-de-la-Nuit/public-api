@@ -3,7 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	_ "github.com/lib/pq"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 var (
@@ -16,8 +16,8 @@ type Credentials struct {
 }
 
 func (c *Credentials) GenerateConnectionString(db string) string {
-	return fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", "db-"+db, 5432, c.User,
-		c.Password, db)
+	return fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?parseTime=true", c.User,
+		c.Password, "db-"+db, 3306, db)
 }
 
 func (c *Credentials) Connect(driverName string, dbName string) (*sql.DB, error) {

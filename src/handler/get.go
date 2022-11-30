@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"net/http"
 	"public-api/src/database"
-	"public-api/src/database/postgres"
+	"public-api/src/database/mariadb"
 	"public-api/src/response"
 )
 
@@ -12,7 +12,7 @@ type getHandle struct {
 	w      http.ResponseWriter
 	r      *http.Request
 	resp   *response.Response
-	pg     postgres.Postgres
+	pg     mariadb.Mariadb
 	dbName string
 }
 
@@ -26,9 +26,9 @@ func getUserHandler(w http.ResponseWriter, r *http.Request, resp *response.Respo
 		return
 	}
 
-	var users []postgres.User
+	var users []mariadb.User
 	for result.Next() {
-		var user postgres.User
+		var user mariadb.User
 		err := result.Scan(&user.ID, &user.Discord, &user.RoleID)
 		if err != nil {
 			panic(err)
@@ -50,9 +50,9 @@ func getRoleHandler(w http.ResponseWriter, r *http.Request, resp *response.Respo
 		return
 	}
 
-	var roles []postgres.Role
+	var roles []mariadb.Role
 	for result.Next() {
-		var role postgres.Role
+		var role mariadb.Role
 		err := result.Scan(&role.ID, &role.Name, &role.Description)
 		if err != nil {
 			panic(err)
@@ -62,6 +62,65 @@ func getRoleHandler(w http.ResponseWriter, r *http.Request, resp *response.Respo
 	resp.StatusCode = http.StatusOK
 	resp.Message = "OK"
 	resp.Data = roles
+}
+
+func getPostHandler(w http.ResponseWriter, r *http.Request, resp *response.Response) {
+	h := getHandle{w: w, r: r, resp: resp}
+	h.initializeDbForGet("posts")
+	result, err := h.getHandler("posts")
+	defer h.pg.Db.Close()
+
+	if h.manageErrors(result, err) {
+		return
+	}
+
+	var rawPosts []mariadb.RawPost
+	for result.Next() {
+		var post mariadb.RawPost
+		err := result.Scan(&post.ID, &post.Title, &post.Content, &post.CreatedAt)
+		if err != nil {
+			panic(err)
+		}
+		rawPosts = append(rawPosts, post)
+	}
+	resp.StatusCode = http.StatusOK
+	resp.Message = "OK"
+	data := make([]mariadb.Post, len(rawPosts))
+	for i := range rawPosts {
+		data = append(data, rawPosts[i].ToPost())
+	}
+	for i := range data {
+		t, err := database.GetTagsForPost(h.pg.Db, data[i].ID)
+		if err != nil {
+			panic(err)
+		}
+		data[i].Tag = t
+	}
+	resp.Data = data
+}
+
+func getTagHandler(w http.ResponseWriter, r *http.Request, resp *response.Response) {
+	h := getHandle{w: w, r: r, resp: resp, dbName: "posts"}
+	h.initializeDbForGet("posts")
+	result, err := h.getHandler("tags")
+	defer h.pg.Db.Close()
+
+	if h.manageErrors(result, err) {
+		return
+	}
+
+	var tags []mariadb.Tag
+	for result.Next() {
+		var tag mariadb.Tag
+		err := result.Scan(&tag.ID, &tag.Name)
+		if err != nil {
+			panic(err)
+		}
+		tags = append(tags, tag)
+	}
+	resp.StatusCode = http.StatusOK
+	resp.Message = "OK"
+	resp.Data = tags
 }
 
 func (h *getHandle) getHandler(table string) (*sql.Rows, error) {
@@ -89,26 +148,20 @@ func (h *getHandle) getOneHandler(table string) (*sql.Rows, error) {
 		w.WriteHeader(resp.StatusCode)
 		return nil, nil
 	}
-	return h.pg.Get("SELECT * FROM "+table+" WHERE id = $1", id)
+	return h.pg.Get("SELECT * FROM "+table+" WHERE id = ?", id)
 }
 
 func (h *getHandle) getAllHandler(table string) (*sql.Rows, error) {
-	c := database.PublicCredentials
-	db, err := c.Connect("postgres", c.GenerateConnectionString(h.dbName))
-	if err != nil {
-		panic(err)
-	}
-	defer db.Close()
 	return h.pg.Get("SELECT * FROM " + table)
 }
 
 func (h *getHandle) initializeDbForGet(dbName string) {
 	c := database.PublicCredentials
-	db, err := c.Connect("postgres", c.GenerateConnectionString(dbName))
+	db, err := c.Connect("mysql", dbName)
 	if err != nil {
 		panic(err)
 	}
-	h.pg = postgres.Postgres{Db: db}
+	h.pg = mariadb.Mariadb{Db: db}
 	h.dbName = dbName
 }
 
