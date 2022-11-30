@@ -66,7 +66,7 @@ You need to give these args:
 ./public-api user password
 ```
 
-## Docker
+### Docker
 
 You can also run the project using Docker.
 
