@@ -71,7 +71,7 @@ You need to give these args:
 You can also run the project using Docker.
 
 ```bash
-docker run -p 8080:80 -e USER="user" PASSWORD="password" le-monde-de-la-nuit/public-api
+docker run -p 8080:80 -e USER="user" -e PASSWORD="password" le-monde-de-la-nuit/public-api
 ```
 or with docker-compose (just rename the file `compose.sample.yaml` into `compose.yaml`)
 ```bash
